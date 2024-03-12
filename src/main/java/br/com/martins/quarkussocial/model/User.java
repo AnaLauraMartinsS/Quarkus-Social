@@ -7,7 +7,7 @@ import lombok.Data;
 @Entity
 @Table(name = "users")
 @Data
-public class User extends PanacheEntityBase {
+public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

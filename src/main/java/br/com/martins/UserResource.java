@@ -2,7 +2,9 @@ package br.com.martins;
 
 import br.com.martins.quarkussocial.controller.dto.CreateUserRequest;
 import br.com.martins.quarkussocial.model.User;
+import br.com.martins.quarkussocial.model.dao.UserDao;
 import io.quarkus.hibernate.orm.panache.PanacheQuery;
+import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -10,6 +12,13 @@ import jakarta.ws.rs.core.Response;
 
 @Path("/users")
 public class UserResource {
+
+    private final UserDao dao;
+
+    @Inject
+    public UserResource(UserDao dao) {
+        this.dao = dao;
+    }
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
@@ -21,7 +30,7 @@ public class UserResource {
         user.setName(userRequest.getName());
         user.setAge(userRequest.getAge());
 
-        user.persist();
+        dao.persist(user);
 
         return Response.ok(user).build();
     }
@@ -30,7 +39,7 @@ public class UserResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response listAllUsers() {
 
-        PanacheQuery<User>query = User.findAll();
+        PanacheQuery<User>query = dao.findAll();
 
         return Response.ok(query.list()).build();
     }
@@ -40,10 +49,10 @@ public class UserResource {
     @Transactional
     public Response deleteUser ( @PathParam("id") Long id) {
 
-        User user = User.findById(id);
+        User user = dao.findById(id);
 
         if(user != null){
-            user.delete();
+            dao.delete(user);
             return Response.ok().build();
         }
 
@@ -55,7 +64,7 @@ public class UserResource {
     @Transactional
     public Response updateUser ( @PathParam("id") Long id, CreateUserRequest userData) {
 
-        User user = User.findById(id);
+        User user = dao.findById(id);
 
         if(user != null){
             user.setName(userData.getName());
