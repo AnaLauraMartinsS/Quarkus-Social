@@ -1,15 +1,9 @@
 package br.com.martins.social.model;
 
-import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.*;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
-
+import lombok.Data;
 @Entity
-@Getter
-@Setter
-@EqualsAndHashCode
+@Data
 public class User {
 
     @Id

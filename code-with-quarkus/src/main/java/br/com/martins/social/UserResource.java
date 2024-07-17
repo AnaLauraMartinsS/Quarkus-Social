@@ -1,6 +1,7 @@
 package br.com.martins.social;
 
 import br.com.martins.social.dto.CreateUserRequest;
+import br.com.martins.social.dto.ResponseError;
 import br.com.martins.social.model.User;
 import br.com.martins.social.repository.UserRepository;
 import io.quarkus.hibernate.orm.panache.PanacheQuery;
@@ -11,7 +12,6 @@ import jakarta.validation.Validator;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-
 import java.util.Set;
 
 @Path("/users")
@@ -34,9 +34,9 @@ public class UserResource {
 
         Set<ConstraintViolation<CreateUserRequest>> violations = validator.validate(userRequest);
         if(!violations.isEmpty()){
-            ConstraintViolation<CreateUserRequest> erro = violations.stream().findAny().get();
-            String errorMessage = erro.getMessage();
-            return  Response.status(400).entity(errorMessage).build();
+            return  ResponseError
+                    .createFromValidation(violations)
+                    .withStatusCode(ResponseError.UNPROCESSABLE_ENTITY_STATUS);
         }
 
         User user = new User();
@@ -45,7 +45,9 @@ public class UserResource {
 
         repository.persist(user);
 
-        return Response.ok(user).build();
+        return Response
+                .status(Response.Status.CREATED.getStatusCode())
+                .entity(user).build();
     }
 
     @GET
@@ -65,8 +67,7 @@ public class UserResource {
 
          if(user != null){
              repository.delete(user);
-
-             return Response.ok().build();
+             return Response.noContent().build();
          }
 
          return Response.status(Response.Status.NOT_FOUND).build();
@@ -85,7 +86,7 @@ public class UserResource {
             user.setName(userData.getName());
             user.setAge(userData.getAge());
 
-            return Response.ok().build();
+            return Response.noContent().build();
         }
 
         return Response.status(Response.Status.NOT_FOUND).build();
